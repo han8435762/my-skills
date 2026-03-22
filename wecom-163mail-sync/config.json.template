@@ -1,0 +1,11 @@
+{
+  "email": "your_email@163.com",
+  "imap_password": "",
+  "imap_server": "imap.163.com",
+  "imap_port": 993,
+  "last_sync_uid": "0",
+  "feishu_table_token": "",
+  "feishu_table_id": "",
+  "feishu_folder_token": "",
+  "feishu_table_url": ""
+}
