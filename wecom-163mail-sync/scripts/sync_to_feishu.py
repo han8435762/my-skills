@@ -49,6 +49,11 @@ def sync_emails_to_feishu():
     # 4. 格式化邮件数据并更新跟踪计数
     formatted_emails = []
     for email_info in emails:
+        # 过滤空邮件（主题和正文都为空）
+        if not email_info.get('subject') and not email_info.get('body'):
+            print(f"跳过空邮件: UID={email_info.get('uid')}")
+            continue
+
         formatted = format_email_for_feishu(email_info)
         formatted_emails.append(formatted)
 

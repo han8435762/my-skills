@@ -214,12 +214,18 @@ def translate_body(body):
     # 分行翻译
     lines = body.split('\n')
     translated_lines = []
+    prev_empty = False
 
     for line in lines:
         line = line.strip()
         if not line:
-            translated_lines.append('')
+            # 只保留单个空行，过滤连续空行
+            if not prev_empty:
+                translated_lines.append('')
+                prev_empty = True
             continue
+
+        prev_empty = False
 
         # 跳过纯分隔符行
         if re.match(r'^[\s\-_|=]+$', line):
