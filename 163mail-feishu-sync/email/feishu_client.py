@@ -155,6 +155,75 @@ def create_record(config, app_token, table_id, fields):
     return data["data"]["record"]["record_id"]
 
 
+def rename_primary_field(config, app_token, table_id, new_name):
+    """将表的主字段（第一列）重命名"""
+    # 先找到主字段 field_id（第一个字段）
+    resp = requests.get(
+        f"{FEISHU_BASE_URL}/bitable/v1/apps/{app_token}/tables/{table_id}/fields",
+        headers=_headers(config),
+        timeout=15,
+    )
+    resp.raise_for_status()
+    data = resp.json()
+    if data.get("code") != 0:
+        raise RuntimeError(f"获取字段列表失败: {data}")
+    primary_field = data["data"]["items"][0]
+    field_id = primary_field["field_id"]
+
+    resp = requests.put(
+        f"{FEISHU_BASE_URL}/bitable/v1/apps/{app_token}/tables/{table_id}/fields/{field_id}",
+        headers=_headers(config),
+        json={"field_name": new_name, "type": 1},
+        timeout=15,
+    )
+    resp.raise_for_status()
+    data = resp.json()
+    if data.get("code") != 0:
+        raise RuntimeError(f"重命名主字段失败: {data}")
+
+
+def list_tables(config, app_token):
+    """列出多维表格所有表，返回 [{name, table_id}]"""
+    resp = requests.get(
+        f"{FEISHU_BASE_URL}/bitable/v1/apps/{app_token}/tables",
+        headers=_headers(config),
+        timeout=15,
+    )
+    resp.raise_for_status()
+    data = resp.json()
+    if data.get("code") != 0:
+        raise RuntimeError(f"获取表列表失败: {data}")
+    return [{"name": t["name"], "table_id": t["table_id"]} for t in data["data"]["items"]]
+
+
+def delete_table(config, app_token, table_id):
+    """删除指定表"""
+    resp = requests.delete(
+        f"{FEISHU_BASE_URL}/bitable/v1/apps/{app_token}/tables/{table_id}",
+        headers=_headers(config),
+        timeout=15,
+    )
+    resp.raise_for_status()
+    data = resp.json()
+    if data.get("code") != 0:
+        raise RuntimeError(f"删除表失败: {data}")
+
+
+def grant_full_access(config, app_token):
+    """为 receiver_open_id 授予多维表格完全管理权限"""
+    open_id = config["feishu"]["receiver_open_id"]
+    resp = requests.post(
+        f"{FEISHU_BASE_URL}/drive/v1/permissions/{app_token}/members?type=bitable",
+        headers=_headers(config),
+        json={"member_type": "openid", "member_id": open_id, "perm": "full_access"},
+        timeout=15,
+    )
+    resp.raise_for_status()
+    data = resp.json()
+    if data.get("code") != 0:
+        raise RuntimeError(f"授权失败: {data}")
+
+
 def send_notification(config, message):
     """发飞书私信通知给 receiver_open_id"""
     open_id = config["feishu"]["receiver_open_id"]

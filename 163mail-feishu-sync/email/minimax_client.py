@@ -1,8 +1,7 @@
-import requests
 import json
+import os
+from openai import OpenAI
 
-
-MINIMAX_API_URL = "https://api.minimax.io/v1/text/chatcompletion_v2"
 
 SYSTEM_PROMPT = """你是邮件分析助手，专注于泵行业外贸邮件。请根据邮件内容提取关键信息，返回严格的JSON格式，不要包含任何其他文字。"""
 
@@ -30,7 +29,7 @@ def extract_ai_fields(config, subject, from_name, from_email, body):
     返回 dict，失败时返回默认值。
     """
     api_key = config["minimax"]["api_key"]
-    model = config["minimax"].get("model", "abab6.5s-chat")
+    model = config["minimax"].get("model", "MiniMax-M2.7")
 
     body_preview = body[:3000] if body else ""
     user_prompt = USER_PROMPT_TEMPLATE.format(
@@ -40,27 +39,23 @@ def extract_ai_fields(config, subject, from_name, from_email, body):
         body=body_preview,
     )
 
-    payload = {
-        "model": model,
-        "messages": [
-            {"role": "system", "content": SYSTEM_PROMPT},
-            {"role": "user", "content": user_prompt},
-        ],
-        "temperature": 0.1,
-        "max_tokens": 2000,
-    }
-
-    headers = {
-        "Authorization": f"Bearer {api_key}",
-        "Content-Type": "application/json",
-    }
+    client = OpenAI(
+        api_key=api_key,
+        base_url="https://api.minimaxi.com/v1",
+    )
 
     try:
-        resp = requests.post(MINIMAX_API_URL, json=payload, headers=headers, timeout=30)
-        resp.raise_for_status()
-        data = resp.json()
+        response = client.chat.completions.create(
+            model=model,
+            messages=[
+                {"role": "system", "content": SYSTEM_PROMPT},
+                {"role": "user", "content": user_prompt},
+            ],
+            temperature=0.1,
+            max_tokens=2000,
+        )
 
-        content = data["choices"][0]["message"]["content"]
+        content = response.choices[0].message.content
 
         # 提取JSON部分（防止模型输出额外文字）
         json_start = content.find("{")
