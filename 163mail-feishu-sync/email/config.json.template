@@ -1,0 +1,19 @@
+{
+  "imap": {
+    "server": "imap.163.com",
+    "port": 993,
+    "email": "xxx@163.com",
+    "password": "your_imap_auth_code"
+  },
+  "feishu": {
+    "app_id": "cli_xxx",
+    "app_secret": "xxx",
+    "app_token": "",
+    "table_id": "",
+    "receiver_open_id": "ou_xxx"
+  },
+  "minimax": {
+    "api_key": "your_minimax_api_key",
+    "model": "abab6.5s-chat"
+  }
+}
