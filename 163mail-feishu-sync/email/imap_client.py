@@ -83,7 +83,14 @@ def parse_email_date(date_str):
 
 
 def connect_imap(config):
-    imap = imaplib.IMAP4_SSL(config["imap"]["server"], config["imap"]["port"])
+    imap_cfg = config["imap"]
+    if imap_cfg.get("enterprise", False):
+        server = "imap.qiye.163.com"
+    else:
+        server = imap_cfg.get("server", "imap.163.com")
+    port = imap_cfg.get("port", 993)
+
+    imap = imaplib.IMAP4_SSL(server, port)
     imap.login(config["imap"]["email"], config["imap"]["password"])
 
     # 163邮箱要求发送IMAP ID，避免被封

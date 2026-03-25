@@ -1,7 +1,6 @@
 {
   "imap": {
-    "server": "imap.163.com",
-    "port": 993,
+    "enterprise": false,
     "email": "xxx@163.com",
     "password": "your_imap_auth_code"
   },
